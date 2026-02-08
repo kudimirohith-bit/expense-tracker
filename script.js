@@ -5,10 +5,11 @@ const addBtn = document.getElementById("addBtn");
 const expenseList = document.getElementById("expenseList");
 const totalEl = document.getElementById("total");
 
-let expenses = [];
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 let total = 0;
 
 addBtn.addEventListener("click", addExpense);
+window.addEventListener("load", loadExpenses);
 
 function addExpense() {
     const description = descriptionInput.value.trim();
@@ -28,27 +29,45 @@ function addExpense() {
     };
 
     expenses.push(expense);
-    total += amount;
-
-    renderExpense(expense);
-    updateTotal();
-
+    saveExpenses();
+    renderExpenses();
     clearInputs();
 }
 
-function renderExpense(expense) {
-    const li = document.createElement("li");
-
-    li.innerHTML = `
-        <span>${expense.description} (${expense.category})</span>
-        <span>₹${expense.amount}</span>
-    `;
-
-    expenseList.appendChild(li);
+function deleteExpense(id) {
+    expenses = expenses.filter(exp => exp.id !== id);
+    saveExpenses();
+    renderExpenses();
 }
 
-function updateTotal() {
+function renderExpenses() {
+    expenseList.innerHTML = "";
+    total = 0;
+
+    expenses.forEach(expense => {
+        total += expense.amount;
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <span>${expense.description} (${expense.category})</span>
+            <span>
+                ₹${expense.amount}
+                <button onclick="deleteExpense(${expense.id})">❌</button>
+            </span>
+        `;
+
+        expenseList.appendChild(li);
+    });
+
     totalEl.textContent = total;
+}
+
+function saveExpenses() {
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+}
+
+function loadExpenses() {
+    renderExpenses();
 }
 
 function clearInputs() {
