@@ -1,15 +1,16 @@
 const descriptionInput = document.getElementById("description");
 const amountInput = document.getElementById("amount");
 const categorySelect = document.getElementById("category");
+const filterCategory = document.getElementById("filterCategory");
 const addBtn = document.getElementById("addBtn");
 const expenseList = document.getElementById("expenseList");
 const totalEl = document.getElementById("total");
 
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-let total = 0;
 
 addBtn.addEventListener("click", addExpense);
-window.addEventListener("load", loadExpenses);
+filterCategory.addEventListener("change", renderExpenses);
+window.addEventListener("load", renderExpenses);
 
 function addExpense() {
     const description = descriptionInput.value.trim();
@@ -21,14 +22,13 @@ function addExpense() {
         return;
     }
 
-    const expense = {
+    expenses.push({
         id: Date.now(),
         description,
         amount,
         category
-    };
+    });
 
-    expenses.push(expense);
     saveExpenses();
     renderExpenses();
     clearInputs();
@@ -42,32 +42,31 @@ function deleteExpense(id) {
 
 function renderExpenses() {
     expenseList.innerHTML = "";
-    total = 0;
+    let total = 0;
 
-    expenses.forEach(expense => {
-        total += expense.amount;
+    const selectedCategory = filterCategory.value;
 
-        const li = document.createElement("li");
-        li.innerHTML = `
-            <span>${expense.description} (${expense.category})</span>
-            <span>
-                ₹${expense.amount}
-                <button onclick="deleteExpense(${expense.id})">❌</button>
-            </span>
-        `;
+    expenses
+        .filter(exp => selectedCategory === "All" || exp.category === selectedCategory)
+        .forEach(expense => {
+            total += expense.amount;
 
-        expenseList.appendChild(li);
-    });
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span>${expense.description} (${expense.category})</span>
+                <span>
+                    ₹${expense.amount}
+                    <button onclick="deleteExpense(${expense.id})">❌</button>
+                </span>
+            `;
+            expenseList.appendChild(li);
+        });
 
     totalEl.textContent = total;
 }
 
 function saveExpenses() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
-}
-
-function loadExpenses() {
-    renderExpenses();
 }
 
 function clearInputs() {

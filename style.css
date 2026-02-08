@@ -32,3 +32,13 @@ li {
     justify-content: space-between;
     margin-top: 8px;
 }
+#filterCategory {
+    margin: 10px 0;
+}
+
+li button {
+    margin-left: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
